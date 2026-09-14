@@ -34,6 +34,7 @@
     background:var(--paper);color:var(--ink);
     font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
   }
+  body.travado{overflow:hidden}
   button,input,select,textarea{font:inherit;color:inherit}
   table{border-collapse:collapse;width:100%}
   .num{font-variant-numeric:tabular-nums}
@@ -47,13 +48,12 @@
   .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line-strong)}
   .btn.ghost:hover{background:var(--paper)}
   .btn.sm{padding:5px 10px;font-size:13px}
-  .btn:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--burgundy);outline-offset:2px}
+  .btn:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--burgundy);outline-offset:2px}
 
   .field{margin-bottom:14px}
   .field label{display:block;font-size:13px;font-weight:500;margin-bottom:5px}
   .field input,.field select{width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:var(--radius);background:#fff}
   .field input:focus,.field select:focus{outline:2px solid var(--burgundy);outline-offset:-1px;border-color:var(--burgundy)}
-  .field small{display:block;color:var(--ink-soft);font-size:12px;margin-top:4px}
 
   /* ---------- LOGIN ---------- */
   #login{min-height:100vh;display:grid;place-items:center;padding:24px;background:var(--ink)}
@@ -89,15 +89,34 @@
   main{padding:26px 26px 70px;max-width:1080px}
   section.view{display:none}
   section.view.active{display:block}
+
+  .topo{display:flex;align-items:flex-start;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+  .topo .txt{flex:1;min-width:220px}
   h2{font-size:20px;font-weight:600;margin:0 0 4px;letter-spacing:-.01em}
-  .hint{color:var(--ink-soft);font-size:13.5px;margin:0 0 20px}
+  .hint{color:var(--ink-soft);font-size:13.5px;margin:0}
+  .nota{color:var(--ink-soft);font-size:12.5px;margin:14px 0 0}
 
   .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:18px}
   .card h3{font-size:15px;font-weight:600;margin:0 0 14px}
   .row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
   .row > .field{flex:1;min-width:140px;margin-bottom:0}
+  .gridform{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;align-items:start}
+  .gridform .field{margin-bottom:0}
   .barra{width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:var(--radius)}
   .barra:focus{outline:2px solid var(--burgundy);outline-offset:-1px}
+
+  /* ---------- MODAL ---------- */
+  #overlay{position:fixed;inset:0;background:rgba(20,23,27,.55);z-index:80;display:flex;align-items:flex-start;justify-content:center;padding:32px 16px;overflow-y:auto}
+  #modal{background:var(--panel);width:100%;max-width:660px;border-radius:6px;box-shadow:0 18px 50px rgba(0,0,0,.28)}
+  #modal .cab{display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid var(--line)}
+  #modal .cab h3{flex:1;margin:0;font-size:17px;font-weight:600}
+  #modal .cab button{background:none;border:none;font-size:24px;line-height:1;color:var(--ink-soft);cursor:pointer;padding:0 4px}
+  #modal .cab button:hover{color:var(--ink)}
+  #modal .corpo{padding:20px 22px}
+  #modal .bloco{margin-bottom:18px}
+  #modal .rodape{padding:16px 22px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;background:#FBFBFA;border-radius:0 0 6px 6px}
+  #modal .rodape .field{max-width:170px;margin-bottom:0}
+  #modal .rodape .espaco{flex:1}
 
   /* ---------- COMBOBOX ---------- */
   .combo{position:relative}
@@ -107,7 +126,7 @@
   .combo .lista{
     position:absolute;z-index:20;left:0;right:0;top:100%;margin-top:3px;
     background:#fff;border:1px solid var(--line-strong);border-radius:var(--radius);
-    max-height:260px;overflow:auto;box-shadow:0 6px 18px rgba(26,29,33,.14);
+    max-height:240px;overflow:auto;box-shadow:0 6px 18px rgba(26,29,33,.16);
   }
   .combo .lista .op{padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--line);font-size:14px}
   .combo .lista .op:last-child{border-bottom:none}
@@ -117,10 +136,7 @@
   .combo .lista .op.vazio{color:var(--ink-soft);cursor:default}
   .combo .lista .op.indisp{opacity:.55;cursor:not-allowed}
 
-  .escolhido{
-    display:flex;align-items:flex-start;gap:10px;margin-top:10px;padding:11px 12px;
-    background:var(--paper);border-radius:var(--radius);font-size:14px;
-  }
+  .escolhido{display:flex;align-items:flex-start;gap:10px;margin-top:10px;padding:11px 12px;background:var(--paper);border-radius:var(--radius);font-size:14px}
   .escolhido .txt{flex:1;min-width:0}
   .escolhido strong{display:block}
   .escolhido small{color:var(--ink-soft)}
@@ -130,8 +146,8 @@
   .novoform{margin-top:12px;padding:14px;border:1px dashed var(--line-strong);border-radius:var(--radius);background:#FCFCFB}
   .novoform h4{margin:0 0 12px;font-size:14px;font-weight:600}
 
-  .resumo{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
-  .resumo .linha{display:flex;justify-content:space-between;gap:14px;padding:6px 0;font-size:14px}
+  .resumo{background:var(--paper);border-radius:var(--radius);padding:12px 14px}
+  .resumo .linha{display:flex;justify-content:space-between;gap:14px;padding:5px 0;font-size:14px}
   .resumo .linha span:first-child{color:var(--ink-soft)}
   .resumo .linha strong{text-align:right}
 
@@ -147,7 +163,7 @@
   .tag.zero{background:#F3E7E9;color:var(--red)}
   .empty{padding:30px 16px;text-align:center;color:var(--ink-soft);font-size:14px}
 
-  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:var(--radius);font-size:14px;max-width:88vw;z-index:60;display:none}
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:var(--radius);font-size:14px;max-width:88vw;z-index:120;display:none}
   #toast.err{background:var(--red)}
 
   @media(max-width:880px){
@@ -159,6 +175,9 @@
     aside#side .foot{display:flex;align-items:center;gap:12px}
     aside#side .foot button{margin-top:0;width:auto}
     main{padding:20px 16px 60px}
+    #overlay{padding:0}
+    #modal{max-width:none;min-height:100vh;border-radius:0}
+    #modal .rodape{border-radius:0}
   }
   @media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
 </style>
@@ -185,11 +204,10 @@
       <span>Controle de empréstimos</span>
     </div>
     <nav>
-      <button data-view="balcao"    aria-current="true"><span class="ic">＋</span>Novo empréstimo</button>
-      <button data-view="devolucao" aria-current="false"><span class="ic">↩</span>Devoluções<span class="badge hidden" id="bgDev"></span></button>
+      <button data-view="devolucao" aria-current="true"><span class="ic">▤</span>Empréstimos<span class="badge hidden" id="bgDev"></span></button>
       <button data-view="atrasos"   aria-current="false"><span class="ic">！</span>Atrasos<span class="badge hidden" id="bgAtr"></span></button>
       <button data-view="alunos"    aria-current="false"><span class="ic">☺</span>Alunos</button>
-      <button data-view="livros"    aria-current="false"><span class="ic">▤</span>Acervo</button>
+      <button data-view="livros"    aria-current="false"><span class="ic">▥</span>Acervo</button>
       <button data-view="historico" aria-current="false"><span class="ic">⏱</span>Histórico</button>
       <button data-view="ajustes"   aria-current="false"><span class="ic">⚙</span>Ajustes</button>
     </nav>
@@ -202,77 +220,15 @@
   <div id="content">
   <main>
 
-    <!-- ---------- BALCÃO ---------- -->
-    <section class="view active" id="view-balcao">
-      <h2>Novo empréstimo</h2>
-      <p class="hint">Digite para buscar. Se o aluno ou o título ainda não existir, dá para cadastrar aqui mesmo.</p>
-
-      <div class="card">
-        <div class="combo" id="comboAluno">
-          <label for="inAluno">Aluno</label>
-          <input id="inAluno" type="text" autocomplete="off" role="combobox" aria-expanded="false" placeholder="Nome ou matrícula" />
-          <div class="lista hidden" id="listaAluno"></div>
+    <!-- ---------- EMPRÉSTIMOS ATIVOS (tela principal) ---------- -->
+    <section class="view active" id="view-devolucao">
+      <div class="topo">
+        <div class="txt">
+          <h2>Livros em poder dos alunos</h2>
+          <p class="hint">Ao devolver, o exemplar volta a ficar disponível na hora.</p>
         </div>
-        <div class="escolhido hidden" id="selAluno"></div>
-        <div class="novoform hidden" id="formAluno">
-          <h4>Cadastrar aluno</h4>
-          <div class="row">
-            <div class="field"><label for="nfNome">Nome</label><input id="nfNome" /></div>
-            <div class="field" style="max-width:160px"><label for="nfMat">Matrícula</label><input id="nfMat" /></div>
-            <div class="field" style="max-width:170px"><label for="nfTel">Telefone</label><input id="nfTel" /></div>
-            <div class="field" style="max-width:140px"><label for="nfContrib">Contribuinte</label>
-              <select id="nfContrib"><option value="false">Não</option><option value="true">Sim</option></select>
-            </div>
-          </div>
-          <div style="margin-top:12px;display:flex;gap:8px">
-            <button class="btn sm" id="btnSalvarNovoAluno">Cadastrar e selecionar</button>
-            <button class="btn ghost sm" id="btnCancelarNovoAluno">Cancelar</button>
-          </div>
-        </div>
+        <button class="btn" id="btnAbrirModal">Emprestar livro</button>
       </div>
-
-      <div class="card">
-        <div class="combo" id="comboLivro">
-          <label for="inLivro">Livro</label>
-          <input id="inLivro" type="text" autocomplete="off" role="combobox" aria-expanded="false" placeholder="Título ou código" />
-          <div class="lista hidden" id="listaLivro"></div>
-        </div>
-        <div class="escolhido hidden" id="selLivro"></div>
-        <div class="novoform hidden" id="formLivro">
-          <h4>Cadastrar título</h4>
-          <div class="row">
-            <div class="field"><label for="nlTitulo">Título</label><input id="nlTitulo" /></div>
-            <div class="field"><label for="nlAutor">Autor</label><input id="nlAutor" /></div>
-            <div class="field" style="max-width:150px"><label for="nlCodigo">Código</label><input id="nlCodigo" /></div>
-            <div class="field" style="max-width:120px"><label for="nlQtd">Exemplares</label><input id="nlQtd" type="number" min="1" value="1" /></div>
-            <div class="field" style="max-width:140px"><label for="nlPrazo">Prazo (dias)</label><input id="nlPrazo" type="number" min="1" placeholder="padrão" /></div>
-          </div>
-          <div style="margin-top:12px;display:flex;gap:8px">
-            <button class="btn sm" id="btnSalvarNovoLivro">Cadastrar e selecionar</button>
-            <button class="btn ghost sm" id="btnCancelarNovoLivro">Cancelar</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="resumo">
-        <div class="linha"><span>Prazo aplicado</span><strong id="rsPrazo">—</strong></div>
-        <div class="linha"><span>Devolver até</span><strong id="rsData">—</strong></div>
-        <div class="linha"><span>Exemplares após o empréstimo</span><strong id="rsRestante">—</strong></div>
-        <div class="row" style="margin-top:16px">
-          <div class="field" style="max-width:170px;margin-bottom:0">
-            <label for="prazoCustom">Prazo só desta vez</label>
-            <input id="prazoCustom" type="number" min="1" placeholder="opcional" />
-          </div>
-          <button class="btn" id="btnEmprestar" disabled>Registrar empréstimo</button>
-          <button class="btn ghost" id="btnLimpar">Limpar</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- ---------- DEVOLUÇÃO ---------- -->
-    <section class="view" id="view-devolucao">
-      <h2>Livros em poder dos alunos</h2>
-      <p class="hint">Ao devolver, o exemplar volta a ficar disponível na hora.</p>
       <div class="card" style="padding:12px 16px">
         <input type="search" id="filtroDev" class="barra" placeholder="Filtrar por aluno, matrícula, título ou código" />
       </div>
@@ -281,16 +237,20 @@
 
     <!-- ---------- ATRASOS ---------- -->
     <section class="view" id="view-atrasos">
-      <h2>Empréstimos vencidos</h2>
-      <p class="hint">Multa calculada pela regra dos Ajustes, considerando se o aluno é contribuinte.</p>
+      <div class="topo"><div class="txt">
+        <h2>Empréstimos vencidos</h2>
+        <p class="hint">Multa calculada pela regra dos Ajustes, considerando se o aluno é contribuinte.</p>
+      </div></div>
       <div class="tbl-wrap"><table id="tblAtrasos"></table></div>
       <div style="margin-top:14px"><button class="btn ghost sm" id="btnCsvAtrasos">Baixar lista em CSV</button></div>
     </section>
 
     <!-- ---------- ALUNOS ---------- -->
     <section class="view" id="view-alunos">
-      <h2>Alunos</h2>
-      <p class="hint">A matrícula não pode se repetir dentro da mesma biblioteca.</p>
+      <div class="topo"><div class="txt">
+        <h2>Alunos</h2>
+        <p class="hint">A matrícula não pode se repetir dentro da mesma biblioteca.</p>
+      </div></div>
       <div class="card">
         <h3>Cadastrar aluno</h3>
         <div class="row">
@@ -311,8 +271,10 @@
 
     <!-- ---------- ACERVO ---------- -->
     <section class="view" id="view-livros">
-      <h2>Acervo</h2>
-      <p class="hint">Exemplares é o total de cópias. O prazo em branco usa o prazo geral dos Ajustes.</p>
+      <div class="topo"><div class="txt">
+        <h2>Acervo</h2>
+        <p class="hint">Exemplares é o total de cópias. O prazo em branco usa o prazo geral dos Ajustes.</p>
+      </div></div>
       <div class="card">
         <h3>Cadastrar título</h3>
         <div class="row">
@@ -332,8 +294,10 @@
 
     <!-- ---------- HISTÓRICO ---------- -->
     <section class="view" id="view-historico">
-      <h2>Histórico de empréstimos</h2>
-      <p class="hint">Tudo que já saiu e voltou, com a multa apurada.</p>
+      <div class="topo"><div class="txt">
+        <h2>Histórico de empréstimos</h2>
+        <p class="hint">Tudo que já saiu e voltou, com a multa apurada.</p>
+      </div></div>
       <div class="card" style="padding:12px 16px">
         <input type="search" id="filtroHist" class="barra" placeholder="Filtrar por aluno, matrícula ou título" />
       </div>
@@ -343,29 +307,108 @@
 
     <!-- ---------- AJUSTES ---------- -->
     <section class="view" id="view-ajustes">
-      <h2>Ajustes</h2>
-      <p class="hint">Estas regras valem apenas para esta biblioteca.</p>
+      <div class="topo"><div class="txt">
+        <h2>Ajustes</h2>
+        <p class="hint">Estas regras valem apenas para esta biblioteca.</p>
+      </div></div>
       <div class="card">
         <h3>Empréstimo e multa</h3>
-        <div class="row">
-          <div class="field" style="max-width:150px"><label for="cPrazo">Prazo geral (dias)</label><input id="cPrazo" type="number" min="1" /><small>Usado quando o livro não tem prazo próprio</small></div>
-          <div class="field" style="max-width:150px"><label for="cCarencia">Carência (dias)</label><input id="cCarencia" type="number" min="0" /></div>
-          <div class="field" style="max-width:160px"><label for="cMulta">Multa por dia (R$)</label><input id="cMulta" type="number" step="0.01" min="0" /></div>
-          <div class="field" style="max-width:200px"><label for="cMultaC">Multa/dia contribuinte (R$)</label><input id="cMultaC" type="number" step="0.01" min="0" /></div>
-          <div class="field" style="max-width:160px"><label for="cTeto">Teto da multa (R$)</label><input id="cTeto" type="number" step="0.01" min="0" /></div>
-          <div class="field" style="max-width:180px"><label for="cBloq">Bloquear com atraso</label>
+        <div class="gridform">
+          <div class="field"><label for="cPrazo">Prazo geral (dias)</label><input id="cPrazo" type="number" min="1" /></div>
+          <div class="field"><label for="cCarencia">Carência (dias)</label><input id="cCarencia" type="number" min="0" /></div>
+          <div class="field"><label for="cMulta">Multa por dia (R$)</label><input id="cMulta" type="number" step="0.01" min="0" /></div>
+          <div class="field"><label for="cMultaC">Multa/dia contribuinte (R$)</label><input id="cMultaC" type="number" step="0.01" min="0" /></div>
+          <div class="field"><label for="cTeto">Teto da multa (R$)</label><input id="cTeto" type="number" step="0.01" min="0" /></div>
+          <div class="field"><label for="cBloq">Bloquear com atraso</label>
             <select id="cBloq"><option value="true">Sim</option><option value="false">Não</option></select>
           </div>
-          <button class="btn" id="btnSalvarConfig">Salvar regras</button>
         </div>
+        <p class="nota">O prazo geral é usado nos livros que não têm prazo próprio cadastrado no Acervo. A carência são os dias de atraso perdoados antes de a multa começar a contar. Deixe o teto em branco para a multa não ter limite.</p>
+        <div style="margin-top:16px"><button class="btn" id="btnSalvarConfig">Salvar regras</button></div>
       </div>
       <div class="card">
         <h3>Backup</h3>
+        <p class="hint" style="margin-bottom:14px">Baixe e guarde estes arquivos toda semana.</p>
         <button class="btn ghost sm" id="btnBackup">Baixar backup completo (CSV)</button>
       </div>
     </section>
 
   </main>
+  </div>
+</div>
+
+<!-- ================= MODAL DE EMPRÉSTIMO ================= -->
+<div id="overlay" class="hidden">
+  <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+    <div class="cab">
+      <h3 id="modalTitulo">Novo empréstimo</h3>
+      <button id="btnFecharModal" title="Fechar" aria-label="Fechar">×</button>
+    </div>
+
+    <div class="corpo">
+      <div class="bloco">
+        <div class="combo" id="comboAluno">
+          <label for="inAluno">Aluno</label>
+          <input id="inAluno" type="text" autocomplete="off" role="combobox" aria-expanded="false" placeholder="Nome ou matrícula" />
+          <div class="lista hidden" id="listaAluno"></div>
+        </div>
+        <div class="escolhido hidden" id="selAluno"></div>
+        <div class="novoform hidden" id="formAluno">
+          <h4>Cadastrar aluno</h4>
+          <div class="gridform">
+            <div class="field"><label for="nfNome">Nome</label><input id="nfNome" /></div>
+            <div class="field"><label for="nfMat">Matrícula</label><input id="nfMat" /></div>
+            <div class="field"><label for="nfTel">Telefone</label><input id="nfTel" /></div>
+            <div class="field"><label for="nfContrib">Contribuinte</label>
+              <select id="nfContrib"><option value="false">Não</option><option value="true">Sim</option></select>
+            </div>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:8px">
+            <button class="btn sm" id="btnSalvarNovoAluno">Cadastrar e selecionar</button>
+            <button class="btn ghost sm" id="btnCancelarNovoAluno">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bloco">
+        <div class="combo" id="comboLivro">
+          <label for="inLivro">Livro</label>
+          <input id="inLivro" type="text" autocomplete="off" role="combobox" aria-expanded="false" placeholder="Título ou código" />
+          <div class="lista hidden" id="listaLivro"></div>
+        </div>
+        <div class="escolhido hidden" id="selLivro"></div>
+        <div class="novoform hidden" id="formLivro">
+          <h4>Cadastrar título</h4>
+          <div class="gridform">
+            <div class="field"><label for="nlTitulo">Título</label><input id="nlTitulo" /></div>
+            <div class="field"><label for="nlAutor">Autor</label><input id="nlAutor" /></div>
+            <div class="field"><label for="nlCodigo">Código</label><input id="nlCodigo" /></div>
+            <div class="field"><label for="nlQtd">Exemplares</label><input id="nlQtd" type="number" min="1" value="1" /></div>
+            <div class="field"><label for="nlPrazo">Prazo (dias)</label><input id="nlPrazo" type="number" min="1" placeholder="padrão" /></div>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:8px">
+            <button class="btn sm" id="btnSalvarNovoLivro">Cadastrar e selecionar</button>
+            <button class="btn ghost sm" id="btnCancelarNovoLivro">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="resumo">
+        <div class="linha"><span>Prazo aplicado</span><strong id="rsPrazo">—</strong></div>
+        <div class="linha"><span>Devolver até</span><strong id="rsData">—</strong></div>
+        <div class="linha"><span>Exemplares após o empréstimo</span><strong id="rsRestante">—</strong></div>
+      </div>
+    </div>
+
+    <div class="rodape">
+      <div class="field">
+        <label for="prazoCustom">Prazo só desta vez</label>
+        <input id="prazoCustom" type="number" min="1" placeholder="opcional" />
+      </div>
+      <div class="espaco"></div>
+      <button class="btn ghost" id="btnCancelarModal">Cancelar</button>
+      <button class="btn" id="btnEmprestar" disabled>Registrar empréstimo</button>
+    </div>
   </div>
 </div>
 
@@ -457,7 +500,6 @@ async function iniciar() {
 
   await carregarConfig();
   await Promise.all([carregarDevolucoes(), carregarAtrasos(), carregarAlunos(), carregarLivros()]);
-  $("#inAluno").focus();
 }
 
 /* ---------------- navegação ---------------- */
@@ -469,7 +511,6 @@ $$("aside#side nav button").forEach(b => b.addEventListener("click", () => {
   window.scrollTo(0, 0);
   ({ devolucao: carregarDevolucoes, atrasos: carregarAtrasos, alunos: carregarAlunos,
      livros: carregarLivros, historico: carregarHistorico })[b.dataset.view]?.();
-  if (b.dataset.view === "balcao") $("#inAluno").focus();
 }));
 
 function atualizarBadges() {
@@ -477,6 +518,33 @@ function atualizarBadges() {
   d.textContent = cacheDev.length;     d.classList.toggle("hidden", cacheDev.length === 0);
   a.textContent = cacheAtrasos.length; a.classList.toggle("hidden", cacheAtrasos.length === 0);
 }
+
+/* =====================================================================
+   MODAL
+   ===================================================================== */
+function abrirModal() {
+  limparBalcao();
+  $("#overlay").classList.remove("hidden");
+  document.body.classList.add("travado");
+  setTimeout(() => $("#inAluno").focus(), 30);
+}
+
+function fecharModal() {
+  $("#overlay").classList.add("hidden");
+  document.body.classList.remove("travado");
+  $("#btnAbrirModal").focus();
+}
+
+$("#btnAbrirModal").addEventListener("click", abrirModal);
+$("#btnFecharModal").addEventListener("click", fecharModal);
+$("#btnCancelarModal").addEventListener("click", fecharModal);
+$("#overlay").addEventListener("mousedown", e => { if (e.target.id === "overlay") fecharModal(); });
+
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape" || $("#overlay").classList.contains("hidden")) return;
+  const listaAberta = $$("#modal .lista").some(l => !l.classList.contains("hidden"));
+  if (!listaAberta) fecharModal();
+});
 
 /* =====================================================================
    COMBOBOX reutilizável
@@ -516,7 +584,7 @@ function montarCombo({ input, lista, buscar, linha, aoEscolher, textoNovo, aoNov
     if (e.key === "ArrowDown") { e.preventDefault(); idx = Math.min(idx + 1, ops.length - 1); marcar(); }
     else if (e.key === "ArrowUp") { e.preventDefault(); idx = Math.max(idx - 1, 0); marcar(); }
     else if (e.key === "Enter") { e.preventDefault(); if (idx >= 0) ops[idx].click(); }
-    else if (e.key === "Escape") fechar();
+    else if (e.key === "Escape") { e.stopPropagation(); fechar(); }
   });
 
   lista.addEventListener("click", e => {
@@ -675,15 +743,15 @@ function atualizarResumo() {
     : `<span class="tag ok">${rest} de ${livroSel.quantidade_total}</span>`;
 }
 
-$("#btnLimpar").addEventListener("click", limparBalcao);
 function limparBalcao() {
   alunoSel = null; livroSel = null;
   $("#selAluno").classList.add("hidden"); $("#selLivro").classList.add("hidden");
   $("#formAluno").classList.add("hidden"); $("#formLivro").classList.add("hidden");
   comboAluno.limpar(); comboLivro.limpar();
   $("#prazoCustom").value = "";
+  $("#nfNome").value = $("#nfMat").value = $("#nfTel").value = ""; $("#nfContrib").value = "false";
+  $("#nlTitulo").value = $("#nlAutor").value = $("#nlCodigo").value = $("#nlPrazo").value = ""; $("#nlQtd").value = 1;
   atualizarResumo();
-  $("#inAluno").focus();
 }
 
 $("#btnEmprestar").addEventListener("click", async () => {
@@ -695,11 +763,11 @@ $("#btnEmprestar").addEventListener("click", async () => {
   });
   if (error) { toast(error.message, true); btn.disabled = false; return; }
   toast(`${tituloLivro} emprestado para ${nomeAluno}.`);
-  limparBalcao();
+  fecharModal();
   carregarDevolucoes(); carregarLivros();
 });
 
-/* ---------------- devoluções ---------------- */
+/* ---------------- empréstimos ativos ---------------- */
 async function carregarDevolucoes() {
   const { data, error } = await sb.from("emprestimos_detalhe")
     .select("*").is("data_devolucao", null).order("data_prevista");
@@ -727,7 +795,7 @@ function pintarDev() {
           <button class="btn ghost sm" data-ren="${e.id}">Renovar</button>
         </td>
       </tr>`).join("")}</tbody>`
-    : `<tbody><tr><td class="empty">Nenhum livro emprestado no momento.</td></tr></tbody>`;
+    : `<tbody><tr><td class="empty">Nenhum livro emprestado no momento. Use "Emprestar livro" para registrar o primeiro.</td></tr></tbody>`;
 }
 
 $("#tblDev").addEventListener("click", async e => {
@@ -979,3 +1047,4 @@ iniciar();
 </script>
 </body>
 </html>
+
