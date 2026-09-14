@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Biblioteca</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1A1D21;
+    --ink-soft:#5A6069;
+    --paper:#F2F3F1;
+    --panel:#FFFFFF;
+    --line:#DCDFDA;
+    --line-strong:#C3C8C0;
+    --burgundy:#6E2639;
+    --burgundy-dim:#8C3A4E;
+    --amber:#9A5300;
+    --amber-bg:#FBF0E2;
+    --green:#2E6B4F;
+    --green-bg:#E8F1EC;
+    --red:#98202B;
+    --radius:4px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'Archivo',system-ui,-apple-system,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  button,input,select,textarea{font:inherit;color:inherit}
+  table{border-collapse:collapse;width:100%}
+  .num{font-variant-numeric:tabular-nums}
+  .hidden{display:none !important}
+
+  /* ---------- LOGIN ---------- */
+  #login{
+    min-height:100vh;display:grid;place-items:center;padding:24px;
+    background:var(--ink);
+  }
+  #login .box{
+    width:100%;max-width:360px;background:var(--panel);
+    padding:36px 32px;border-radius:var(--radius);
+  }
+  #login h1{
+    font-size:26px;font-weight:600;margin:0 0 4px;letter-spacing:-.02em;
+  }
+  #login p.sub{margin:0 0 28px;color:var(--ink-soft);font-size:14px}
+  .field{margin-bottom:16px}
+  .field label{display:block;font-size:13px;font-weight:500;margin-bottom:6px}
+  .field input,.field select{
+    width:100%;padding:9px 11px;border:1px solid var(--line-strong);
+    border-radius:var(--radius);background:#fff;
+  }
+  .field input:focus,.field select:focus{
+    outline:2px solid var(--burgundy);outline-offset:-1px;border-color:var(--burgundy);
+  }
+  .btn{
+    border:1px solid transparent;border-radius:var(--radius);
+    padding:9px 16px;font-weight:500;cursor:pointer;background:var(--burgundy);color:#fff;
+  }
+  .btn:hover{background:var(--burgundy-dim)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn.wide{width:100%;padding:11px}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line-strong)}
+  .btn.ghost:hover{background:var(--paper)}
+  .btn.sm{padding:5px 10px;font-size:13px}
+  .btn:focus-visible,a:focus-visible{outline:2px solid var(--burgundy);outline-offset:2px}
+
+  /* ---------- SHELL ---------- */
+  header.top{
+    background:var(--ink);color:#fff;padding:0 20px;
+    display:flex;align-items:center;gap:20px;min-height:52px;flex-wrap:wrap;
+  }
+  header.top .brand{font-weight:600;letter-spacing:-.01em}
+  header.top .who{margin-left:auto;font-size:13px;color:#A9AEB4;display:flex;align-items:center;gap:12px}
+  header.top .who button{background:none;border:1px solid #3A4049;color:#D6D9DC;border-radius:var(--radius);padding:4px 10px;font-size:13px;cursor:pointer}
+  header.top .who button:hover{background:#272C33}
+
+  nav.tabs{background:var(--panel);border-bottom:1px solid var(--line);padding:0 20px;display:flex;gap:2px;overflow-x:auto}
+  nav.tabs button{
+    background:none;border:none;border-bottom:2px solid transparent;
+    padding:12px 14px;cursor:pointer;color:var(--ink-soft);font-weight:500;white-space:nowrap;
+  }
+  nav.tabs button[aria-selected="true"]{color:var(--burgundy);border-bottom-color:var(--burgundy)}
+  nav.tabs button:hover{color:var(--ink)}
+
+  main{padding:24px 20px 64px;max-width:1120px;margin:0 auto}
+  section.view{display:none}
+  section.view.active{display:block}
+
+  h2{font-size:19px;font-weight:600;margin:0 0 4px;letter-spacing:-.01em}
+  .hint{color:var(--ink-soft);font-size:13.5px;margin:0 0 18px}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:18px}
+  .card h3{font-size:15px;font-weight:600;margin:0 0 14px}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+  .row > .field{flex:1;min-width:150px;margin-bottom:0}
+
+  /* counter search */
+  .counter{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:760px){.counter{grid-template-columns:1fr}}
+  .pick{border:1px solid var(--line);border-radius:var(--radius);padding:14px;background:var(--panel)}
+  .pick input[type=search]{
+    width:100%;padding:11px 12px;font-size:16px;border:1px solid var(--line-strong);border-radius:var(--radius);
+  }
+  .pick input[type=search]:focus{outline:2px solid var(--burgundy);outline-offset:-1px}
+  .results{margin-top:8px;max-height:210px;overflow:auto;border:1px solid var(--line);border-radius:var(--radius)}
+  .results:empty{display:none}
+  .results div{padding:8px 11px;cursor:pointer;border-bottom:1px solid var(--line);font-size:14px}
+  .results div:last-child{border-bottom:none}
+  .results div:hover,.results div.on{background:var(--paper)}
+  .results div small{display:block;color:var(--ink-soft);font-size:12.5px}
+  .chosen{margin-top:10px;padding:10px 12px;background:var(--paper);border-radius:var(--radius);font-size:14px}
+  .chosen strong{display:block}
+  .chosen small{color:var(--ink-soft)}
+
+  table th{
+    text-align:left;font-size:12.5px;font-weight:600;color:var(--ink-soft);
+    padding:8px 10px;border-bottom:1px solid var(--line-strong);
+  }
+  table td{padding:9px 10px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:middle}
+  table tr:last-child td{border-bottom:none}
+  .tbl-wrap{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow-x:auto}
+
+  .tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:12px;font-weight:500}
+  .tag.late{background:var(--amber-bg);color:var(--amber)}
+  .tag.ok{background:var(--green-bg);color:var(--green)}
+  .tag.zero{background:#F3E7E9;color:var(--red)}
+
+  .empty{padding:28px 16px;text-align:center;color:var(--ink-soft);font-size:14px}
+
+  #toast{
+    position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
+    background:var(--ink);color:#fff;padding:11px 18px;border-radius:var(--radius);
+    font-size:14px;max-width:88vw;z-index:50;
+  }
+  #toast.err{background:var(--red)}
+
+  .warn{background:var(--amber-bg);border:1px solid #E4C89C;color:#6B3B00;padding:10px 12px;border-radius:var(--radius);font-size:13.5px;margin-bottom:16px}
+  @media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<div id="login">
+  <div class="box">
+    <h1>Biblioteca</h1>
+    <p class="sub">Entre com o usuário fornecido pela coordenação.</p>
+    <div class="field">
+      <label for="email">E-mail</label>
+      <input id="email" type="email" autocomplete="username" />
+    </div>
+    <div class="field">
+      <label for="senha">Senha</label>
+      <input id="senha" type="password" autocomplete="current-password" />
+    </div>
+    <button class="btn wide" id="btnEntrar">Entrar</button>
+    <p id="loginErr" style="color:var(--red);font-size:13.5px;margin:14px 0 0"></p>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app" class="hidden">
+  <header class="top">
+    <span class="brand" id="tenantNome">Biblioteca</span>
+    <span class="who">
+      <span id="userNome"></span>
+      <button id="btnSair">Sair</button>
+    </span>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-view="balcao"    aria-selected="true">Balcão</button>
+    <button role="tab" data-view="devolucao" aria-selected="false">Devoluções</button>
+    <button role="tab" data-view="atrasos"   aria-selected="false">Atrasos</button>
+    <button role="tab" data-view="alunos"    aria-selected="false">Alunos</button>
+    <button role="tab" data-view="livros"    aria-selected="false">Acervo</button>
+    <button role="tab" data-view="historico" aria-selected="false">Histórico</button>
+    <button role="tab" data-view="ajustes"   aria-selected="false">Ajustes</button>
+  </nav>
+
+  <main>
+    <!-- ---------- BALCÃO ---------- -->
+    <section class="view active" id="view-balcao">
+      <h2>Registrar empréstimo</h2>
+      <p class="hint">Escaneie ou digite a matrícula do aluno e o código do livro. O prazo vem dos Ajustes.</p>
+      <div class="counter">
+        <div class="pick">
+          <input type="search" id="buscaAluno" placeholder="Aluno: nome ou matrícula" autocomplete="off" />
+          <div class="results" id="resAluno"></div>
+          <div class="chosen hidden" id="alunoSel"></div>
+        </div>
+        <div class="pick">
+          <input type="search" id="buscaLivro" placeholder="Livro: título ou código" autocomplete="off" />
+          <div class="results" id="resLivro"></div>
+          <div class="chosen hidden" id="livroSel"></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:18px">
+        <div class="row">
+          <div class="field" style="max-width:160px">
+            <label for="prazoCustom">Prazo (dias)</label>
+            <input id="prazoCustom" type="number" min="1" placeholder="padrão" />
+          </div>
+          <button class="btn" id="btnEmprestar" disabled>Registrar empréstimo</button>
+          <button class="btn ghost" id="btnLimpar">Limpar</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- DEVOLUÇÃO ---------- -->
+    <section class="view" id="view-devolucao">
+      <h2>Livros em poder dos alunos</h2>
+      <p class="hint">Devolver atualiza a disponibilidade do título na hora.</p>
+      <div class="card">
+        <input type="search" id="filtroDev" placeholder="Filtrar por aluno, matrícula, título ou código" style="width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:var(--radius)" />
+      </div>
+      <div class="tbl-wrap"><table id="tblDev"></table></div>
+    </section>
+
+    <!-- ---------- ATRASOS ---------- -->
+    <section class="view" id="view-atrasos">
+      <h2>Empréstimos vencidos</h2>
+      <p class="hint">Multa calculada pela regra em Ajustes, considerando se o aluno é contribuinte.</p>
+      <div class="tbl-wrap"><table id="tblAtrasos"></table></div>
+      <div style="margin-top:14px"><button class="btn ghost sm" id="btnCsvAtrasos">Baixar lista em CSV</button></div>
+    </section>
+
+    <!-- ---------- ALUNOS ---------- -->
+    <section class="view" id="view-alunos">
+      <h2>Alunos</h2>
+      <p class="hint">Matrícula não pode repetir dentro da mesma biblioteca.</p>
+      <div class="card">
+        <h3>Cadastrar aluno</h3>
+        <div class="row">
+          <div class="field"><label for="aNome">Nome</label><input id="aNome" /></div>
+          <div class="field" style="max-width:170px"><label for="aMat">Matrícula</label><input id="aMat" /></div>
+          <div class="field" style="max-width:180px"><label for="aTel">Telefone</label><input id="aTel" /></div>
+          <div class="field" style="max-width:150px"><label for="aContrib">Contribuinte</label>
+            <select id="aContrib"><option value="false">Não</option><option value="true">Sim</option></select>
+          </div>
+          <button class="btn" id="btnAddAluno">Salvar aluno</button>
+        </div>
+      </div>
+      <div class="card" style="padding:12px 18px">
+        <input type="search" id="filtroAlunos" placeholder="Buscar aluno" style="width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:var(--radius)" />
+      </div>
+      <div class="tbl-wrap"><table id="tblAlunos"></table></div>
+    </section>
+
+    <!-- ---------- LIVROS ---------- -->
+    <section class="view" id="view-livros">
+      <h2>Acervo</h2>
+      <p class="hint">Quantidade é o total de exemplares. A disponibilidade é calculada sozinha.</p>
+      <div class="card">
+        <h3>Cadastrar título</h3>
+        <div class="row">
+          <div class="field"><label for="lTitulo">Título</label><input id="lTitulo" /></div>
+          <div class="field"><label for="lAutor">Autor</label><input id="lAutor" /></div>
+          <div class="field" style="max-width:170px"><label for="lCodigo">Código</label><input id="lCodigo" /></div>
+          <div class="field" style="max-width:130px"><label for="lQtd">Exemplares</label><input id="lQtd" type="number" min="1" value="1" /></div>
+          <button class="btn" id="btnAddLivro">Salvar título</button>
+        </div>
+      </div>
+      <div class="card" style="padding:12px 18px">
+        <input type="search" id="filtroLivros" placeholder="Buscar título ou código" style="width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:var(--radius)" />
+      </div>
+      <div class="tbl-wrap"><table id="tblLivros"></table></div>
+    </section>
+
+    <!-- ---------- HISTÓRICO ---------- -->
+    <section class="view" id="view-historico">
+      <h2>Histórico de empréstimos</h2>
+      <p class="hint">Tudo que já saiu e voltou, incluindo a multa apurada na devolução.</p>
+      <div class="card" style="padding:12px 18px">
+        <input type="search" id="filtroHist" placeholder="Filtrar por aluno, matrícula ou título" style="width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:var(--radius)" />
+      </div>
+      <div class="tbl-wrap"><table id="tblHist"></table></div>
+      <div style="margin-top:14px"><button class="btn ghost sm" id="btnCsvHist">Baixar histórico em CSV</button></div>
+    </section>
+
+    <!-- ---------- AJUSTES ---------- -->
+    <section class="view" id="view-ajustes">
+      <h2>Ajustes</h2>
+      <p class="hint">Estas regras valem apenas para esta biblioteca.</p>
+      <div class="card">
+        <h3>Regras de empréstimo e multa</h3>
+        <div class="row">
+          <div class="field" style="max-width:150px"><label for="cPrazo">Prazo padrão (dias)</label><input id="cPrazo" type="number" min="1" /></div>
+          <div class="field" style="max-width:150px"><label for="cCarencia">Carência (dias)</label><input id="cCarencia" type="number" min="0" /></div>
+          <div class="field" style="max-width:170px"><label for="cMulta">Multa por dia (R$)</label><input id="cMulta" type="number" step="0.01" min="0" /></div>
+          <div class="field" style="max-width:210px"><label for="cMultaC">Multa/dia contribuinte (R$)</label><input id="cMultaC" type="number" step="0.01" min="0" /></div>
+          <div class="field" style="max-width:170px"><label for="cTeto">Teto da multa (R$)</label><input id="cTeto" type="number" step="0.01" min="0" /></div>
+          <div class="field" style="max-width:190px"><label for="cBloq">Bloquear com atraso</label>
+            <select id="cBloq"><option value="true">Sim</option><option value="false">Não</option></select>
+          </div>
+          <button class="btn" id="btnSalvarConfig">Salvar regras</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Backup</h3>
+        <p class="hint" style="margin-bottom:12px">O plano gratuito do Supabase não faz backup automático. Baixe e guarde estes arquivos toda semana.</p>
+        <button class="btn ghost sm" id="btnBackup">Baixar backup completo (CSV)</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script type="module">
+// =====================================================================
+// CONFIGURAÇÃO — troque pelos valores do SEU projeto Supabase
+// Settings → API → Project URL e a chave "anon / public"
+// =====================================================================
+const SUPABASE_URL      = "https://SEU-PROJETO.supabase.co";
+const SUPABASE_ANON_KEY = "COLE_AQUI_A_CHAVE_ANON";
+// =====================================================================
+
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const $  = (s) => document.querySelector(s);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+
+let ctx = { tenant: null, perfil: null, config: null };
+let alunoEscolhido = null, livroEscolhido = null;
+let cacheDev = [], cacheAtrasos = [], cacheAlunos = [], cacheLivros = [], cacheHist = [];
+
+/* ---------------- utilidades ---------------- */
+let toastTimer;
+function toast(msg, erro = false) {
+  let t = $("#toast");
+  if (!t) { t = document.createElement("div"); t.id = "toast"; document.body.appendChild(t); }
+  t.textContent = msg;
+  t.className = erro ? "err" : "";
+  t.style.display = "block";
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.style.display = "none"; }, 4000);
+}
+const fmtData = (iso) => iso ? new Date(iso).toLocaleString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" }) : "—";
+const fmtDia  = (iso) => iso ? new Date(iso).toLocaleDateString("pt-BR") : "—";
+const brl     = (v) => "R$ " + Number(v || 0).toFixed(2).replace(".", ",");
+const esc     = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const like    = (s) => `%${String(s).replace(/[%_,]/g, " ").trim()}%`;
+
+function baixarCSV(nome, linhas) {
+  if (!linhas.length) { toast("Nada para exportar."); return; }
+  const cols = Object.keys(linhas[0]);
+  const corpo = [cols.join(";")].concat(
+    linhas.map(l => cols.map(c => `"${String(l[c] ?? "").replace(/"/g, '""')}"`).join(";"))
+  ).join("\r\n");
+  const url = URL.createObjectURL(new Blob(["\uFEFF" + corpo], { type: "text/csv;charset=utf-8" }));
+  const a = document.createElement("a");
+  a.href = url; a.download = nome; a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ---------------- autenticação ---------------- */
+$("#btnEntrar").addEventListener("click", entrar);
+$("#senha").addEventListener("keydown", e => { if (e.key === "Enter") entrar(); });
+$("#email").addEventListener("keydown", e => { if (e.key === "Enter") $("#senha").focus(); });
+
+async function entrar() {
+  const btn = $("#btnEntrar");
+  btn.disabled = true;
+  $("#loginErr").textContent = "";
+  const { error } = await sb.auth.signInWithPassword({
+    email: $("#email").value.trim(),
+    password: $("#senha").value
+  });
+  btn.disabled = false;
+  if (error) {
+    $("#loginErr").textContent = "E-mail ou senha incorretos.";
+    return;
+  }
+  iniciar();
+}
+
+$("#btnSair").addEventListener("click", async () => {
+  await sb.auth.signOut();
+  location.reload();
+});
+
+async function iniciar() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { $("#login").classList.remove("hidden"); return; }
+
+  const { data: perfil, error } = await sb
+    .from("profiles")
+    .select("nome, papel, tenant_id, tenants(nome)")
+    .eq("id", session.user.id)
+    .maybeSingle();
+
+  if (error || !perfil) {
+    $("#loginErr").textContent = "Este usuário não está vinculado a nenhuma biblioteca. Fale com o administrador.";
+    await sb.auth.signOut();
+    return;
+  }
+
+  ctx.perfil = perfil;
+  ctx.tenant = perfil.tenants;
+  $("#tenantNome").textContent = perfil.tenants?.nome || "Biblioteca";
+  $("#userNome").textContent   = perfil.nome || session.user.email;
+  $("#login").classList.add("hidden");
+  $("#app").classList.remove("hidden");
+
+  await carregarConfig();
+  await Promise.all([carregarDevolucoes(), carregarAtrasos(), carregarAlunos(), carregarLivros()]);
+  $("#buscaAluno").focus();
+}
+
+/* ---------------- navegação ---------------- */
+$$("nav.tabs button").forEach(b => b.addEventListener("click", () => {
+  $$("nav.tabs button").forEach(x => x.setAttribute("aria-selected", "false"));
+  b.setAttribute("aria-selected", "true");
+  $$("section.view").forEach(s => s.classList.remove("active"));
+  $("#view-" + b.dataset.view).classList.add("active");
+  const recarrega = {
+    devolucao: carregarDevolucoes, atrasos: carregarAtrasos,
+    alunos: carregarAlunos, livros: carregarLivros, historico: carregarHistorico
+  };
+  recarrega[b.dataset.view]?.();
+  if (b.dataset.view === "balcao") $("#buscaAluno").focus();
+}));
+
+/* ---------------- balcão: busca ---------------- */
+let tAluno, tLivro;
+
+$("#buscaAluno").addEventListener("input", e => {
+  clearTimeout(tAluno);
+  const termo = e.target.value.trim();
+  if (termo.length < 2) { $("#resAluno").innerHTML = ""; return; }
+  tAluno = setTimeout(async () => {
+    const { data } = await sb.from("alunos")
+      .select("id, nome, matricula, contribuinte")
+      .eq("ativo", true)
+      .or(`nome.ilike.${like(termo)},matricula.ilike.${like(termo)}`)
+      .order("nome").limit(8);
+    $("#resAluno").innerHTML = (data || []).map(a =>
+      `<div data-id="${a.id}" data-nome="${esc(a.nome)}" data-mat="${esc(a.matricula)}" data-c="${a.contribuinte}">
+         ${esc(a.nome)}<small>Matrícula ${esc(a.matricula)}${a.contribuinte ? " · contribuinte" : ""}</small>
+       </div>`).join("");
+  }, 220);
+});
+
+$("#resAluno").addEventListener("click", e => {
+  const d = e.target.closest("div[data-id]"); if (!d) return;
+  alunoEscolhido = { id: d.dataset.id, nome: d.dataset.nome, matricula: d.dataset.mat, contribuinte: d.dataset.c === "true" };
+  $("#alunoSel").innerHTML = `<strong>${esc(alunoEscolhido.nome)}</strong><small>Matrícula ${esc(alunoEscolhido.matricula)}${alunoEscolhido.contribuinte ? " · contribuinte" : ""}</small>`;
+  $("#alunoSel").classList.remove("hidden");
+  $("#resAluno").innerHTML = "";
+  $("#buscaAluno").value = "";
+  $("#buscaLivro").focus();
+  validarBalcao();
+});
+
+$("#buscaLivro").addEventListener("input", e => {
+  clearTimeout(tLivro);
+  const termo = e.target.value.trim();
+  if (termo.length < 2) { $("#resLivro").innerHTML = ""; return; }
+  tLivro = setTimeout(async () => {
+    const { data } = await sb.from("livros_disponibilidade")
+      .select("id, titulo, codigo, disponivel")
+      .or(`titulo.ilike.${like(termo)},codigo.ilike.${like(termo)}`)
+      .order("titulo").limit(8);
+    $("#resLivro").innerHTML = (data || []).map(l =>
+      `<div data-id="${l.id}" data-t="${esc(l.titulo)}" data-cod="${esc(l.codigo)}" data-d="${l.disponivel}">
+         ${esc(l.titulo)}<small>Código ${esc(l.codigo)} · ${l.disponivel} disponível(is)</small>
+       </div>`).join("");
+  }, 220);
+});
+
+$("#resLivro").addEventListener("click", e => {
+  const d = e.target.closest("div[data-id]"); if (!d) return;
+  livroEscolhido = { id: d.dataset.id, titulo: d.dataset.t, codigo: d.dataset.cod, disponivel: Number(d.dataset.d) };
+  $("#livroSel").innerHTML = `<strong>${esc(livroEscolhido.titulo)}</strong><small>Código ${esc(livroEscolhido.codigo)} · ${livroEscolhido.disponivel} disponível(is)</small>`;
+  $("#livroSel").classList.remove("hidden");
+  $("#resLivro").innerHTML = "";
+  $("#buscaLivro").value = "";
+  validarBalcao();
+});
+
+function validarBalcao() {
+  $("#btnEmprestar").disabled = !(alunoEscolhido && livroEscolhido);
+}
+
+$("#btnLimpar").addEventListener("click", limparBalcao);
+function limparBalcao() {
+  alunoEscolhido = livroEscolhido = null;
+  $("#alunoSel").classList.add("hidden");
+  $("#livroSel").classList.add("hidden");
+  $("#buscaAluno").value = ""; $("#buscaLivro").value = "";
+  $("#resAluno").innerHTML = ""; $("#resLivro").innerHTML = "";
+  $("#prazoCustom").value = "";
+  validarBalcao();
+  $("#buscaAluno").focus();
+}
+
+$("#btnEmprestar").addEventListener("click", async () => {
+  const btn = $("#btnEmprestar"); btn.disabled = true;
+  const dias = $("#prazoCustom").value ? Number($("#prazoCustom").value) : null;
+  const { error } = await sb.rpc("registrar_emprestimo", {
+    p_aluno_id: alunoEscolhido.id, p_livro_id: livroEscolhido.id, p_dias: dias
+  });
+  if (error) { toast(error.message, true); btn.disabled = false; return; }
+  toast(`Empréstimo registrado para ${alunoEscolhido.nome}.`);
+  limparBalcao();
+  carregarDevolucoes();
+});
+
+/* ---------------- devoluções ---------------- */
+async function carregarDevolucoes() {
+  const { data, error } = await sb.from("emprestimos_detalhe")
+    .select("*").is("data_devolucao", null).order("data_prevista");
+  if (error) { toast(error.message, true); return; }
+  cacheDev = data || [];
+  pintarDev();
+}
+
+$("#filtroDev").addEventListener("input", pintarDev);
+
+function pintarDev() {
+  const f = $("#filtroDev").value.trim().toLowerCase();
+  const linhas = cacheDev.filter(e => !f ||
+    [e.aluno_nome, e.aluno_matricula, e.livro_titulo, e.livro_codigo]
+      .some(v => String(v || "").toLowerCase().includes(f)));
+  $("#tblDev").innerHTML = linhas.length ? `
+    <thead><tr><th>Aluno</th><th>Livro</th><th>Saída</th><th>Vence</th><th>Situação</th><th></th></tr></thead>
+    <tbody>${linhas.map(e => `
+      <tr>
+        <td>${esc(e.aluno_nome)}<br><small style="color:var(--ink-soft)">${esc(e.aluno_matricula)}</small></td>
+        <td>${esc(e.livro_titulo)}<br><small style="color:var(--ink-soft)">${esc(e.livro_codigo)}</small></td>
+        <td class="num">${fmtData(e.data_emprestimo)}</td>
+        <td class="num">${fmtDia(e.data_prevista)}</td>
+        <td>${e.dias_atraso > 0
+              ? `<span class="tag late">${e.dias_atraso} dia(s) · ${brl(e.multa)}</span>`
+              : `<span class="tag ok">Em dia</span>`}</td>
+        <td style="white-space:nowrap">
+          <button class="btn sm" data-dev="${e.id}">Devolver</button>
+          <button class="btn ghost sm" data-ren="${e.id}">Renovar</button>
+        </td>
+      </tr>`).join("")}</tbody>` : `<tbody><tr><td class="empty">Nenhum livro emprestado no momento.</td></tr></tbody>`;
+}
+
+$("#tblDev").addEventListener("click", async e => {
+  const dev = e.target.closest("button[data-dev]");
+  const ren = e.target.closest("button[data-ren]");
+  if (dev) {
+    const emp = cacheDev.find(x => x.id === dev.dataset.dev);
+    if (emp?.dias_atraso > 0 && !confirm(`Atraso de ${emp.dias_atraso} dia(s). Multa apurada: ${brl(emp.multa)}.\n\nConfirmar devolução?`)) return;
+    const { error } = await sb.rpc("registrar_devolucao", { p_emprestimo_id: dev.dataset.dev });
+    if (error) return toast(error.message, true);
+    toast("Devolução registrada.");
+    carregarDevolucoes(); carregarAtrasos(); carregarLivros();
+  }
+  if (ren) {
+    const { error } = await sb.rpc("renovar_emprestimo", { p_emprestimo_id: ren.dataset.ren, p_dias: null });
+    if (error) return toast(error.message, true);
+    toast("Prazo renovado.");
+    carregarDevolucoes(); carregarAtrasos();
+  }
+});
+
+/* ---------------- atrasos ---------------- */
+async function carregarAtrasos() {
+  const { data, error } = await sb.from("emprestimos_detalhe")
+    .select("*").is("data_devolucao", null).gt("dias_atraso", 0)
+    .order("dias_atraso", { ascending: false });
+  if (error) { toast(error.message, true); return; }
+  cacheAtrasos = data || [];
+  $("#tblAtrasos").innerHTML = cacheAtrasos.length ? `
+    <thead><tr><th>Aluno</th><th>Telefone</th><th>Livro</th><th>Venceu em</th><th>Atraso</th><th>Multa</th></tr></thead>
+    <tbody>${cacheAtrasos.map(e => `
+      <tr>
+        <td>${esc(e.aluno_nome)}<br><small style="color:var(--ink-soft)">${esc(e.aluno_matricula)}${e.aluno_contribuinte ? " · contribuinte" : ""}</small></td>
+        <td class="num">${esc(e.aluno_telefone || "—")}</td>
+        <td>${esc(e.livro_titulo)}<br><small style="color:var(--ink-soft)">${esc(e.livro_codigo)}</small></td>
+        <td class="num">${fmtDia(e.data_prevista)}</td>
+        <td><span class="tag late">${e.dias_atraso} dia(s)</span></td>
+        <td class="num">${brl(e.multa)}</td>
+      </tr>`).join("")}</tbody>` : `<tbody><tr><td class="empty">Nenhum empréstimo vencido. Tudo em dia.</td></tr></tbody>`;
+}
+
+$("#btnCsvAtrasos").addEventListener("click", () => baixarCSV("atrasos.csv",
+  cacheAtrasos.map(e => ({
+    aluno: e.aluno_nome, matricula: e.aluno_matricula, telefone: e.aluno_telefone,
+    contribuinte: e.aluno_contribuinte ? "sim" : "nao", livro: e.livro_titulo,
+    codigo: e.livro_codigo, venceu: fmtDia(e.data_prevista),
+    dias_atraso: e.dias_atraso, multa: Number(e.multa).toFixed(2)
+  }))));
+
+/* ---------------- alunos ---------------- */
+async function carregarAlunos() {
+  const { data, error } = await sb.from("alunos").select("*").order("nome");
+  if (error) { toast(error.message, true); return; }
+  cacheAlunos = data || [];
+  pintarAlunos();
+}
+$("#filtroAlunos").addEventListener("input", pintarAlunos);
+
+function pintarAlunos() {
+  const f = $("#filtroAlunos").value.trim().toLowerCase();
+  const linhas = cacheAlunos.filter(a => !f ||
+    [a.nome, a.matricula, a.telefone].some(v => String(v || "").toLowerCase().includes(f)));
+  $("#tblAlunos").innerHTML = linhas.length ? `
+    <thead><tr><th>Nome</th><th>Matrícula</th><th>Telefone</th><th>Contribuinte</th><th>Situação</th><th></th></tr></thead>
+    <tbody>${linhas.map(a => `
+      <tr>
+        <td>${esc(a.nome)}</td>
+        <td class="num">${esc(a.matricula)}</td>
+        <td class="num">${esc(a.telefone || "—")}</td>
+        <td>${a.contribuinte ? "Sim" : "Não"}</td>
+        <td>${a.ativo ? `<span class="tag ok">Ativo</span>` : `<span class="tag zero">Inativo</span>`}</td>
+        <td style="white-space:nowrap">
+          <button class="btn ghost sm" data-toggle="${a.id}" data-ativo="${a.ativo}">${a.ativo ? "Desativar" : "Reativar"}</button>
+          <button class="btn ghost sm" data-contrib="${a.id}" data-v="${a.contribuinte}">Trocar contrib.</button>
+        </td>
+      </tr>`).join("")}</tbody>` : `<tbody><tr><td class="empty">Nenhum aluno cadastrado ainda. Cadastre o primeiro acima.</td></tr></tbody>`;
+}
+
+$("#btnAddAluno").addEventListener("click", async () => {
+  const nome = $("#aNome").value.trim(), mat = $("#aMat").value.trim();
+  if (!nome || !mat) return toast("Nome e matrícula são obrigatórios.", true);
+  const { error } = await sb.from("alunos").insert({
+    nome, matricula: mat,
+    telefone: $("#aTel").value.trim() || null,
+    contribuinte: $("#aContrib").value === "true"
+  });
+  if (error) return toast(error.message.includes("duplicate") ? "Já existe aluno com essa matrícula." : error.message, true);
+  $("#aNome").value = $("#aMat").value = $("#aTel").value = "";
+  $("#aContrib").value = "false";
+  toast("Aluno cadastrado.");
+  carregarAlunos();
+});
+
+$("#tblAlunos").addEventListener("click", async e => {
+  const t = e.target.closest("button[data-toggle]");
+  const c = e.target.closest("button[data-contrib]");
+  if (t) {
+    const { error } = await sb.from("alunos").update({ ativo: t.dataset.ativo !== "true" }).eq("id", t.dataset.toggle);
+    if (error) return toast(error.message, true);
+    carregarAlunos();
+  }
+  if (c) {
+    const { error } = await sb.from("alunos").update({ contribuinte: c.dataset.v !== "true" }).eq("id", c.dataset.contrib);
+    if (error) return toast(error.message, true);
+    carregarAlunos();
+  }
+});
+
+/* ---------------- livros ---------------- */
+async function carregarLivros() {
+  const { data, error } = await sb.from("livros_disponibilidade").select("*").order("titulo");
+  if (error) { toast(error.message, true); return; }
+  cacheLivros = data || [];
+  pintarLivros();
+}
+$("#filtroLivros").addEventListener("input", pintarLivros);
+
+function pintarLivros() {
+  const f = $("#filtroLivros").value.trim().toLowerCase();
+  const linhas = cacheLivros.filter(l => !f ||
+    [l.titulo, l.codigo, l.autor].some(v => String(v || "").toLowerCase().includes(f)));
+  $("#tblLivros").innerHTML = linhas.length ? `
+    <thead><tr><th>Título</th><th>Autor</th><th>Código</th><th>Exemplares</th><th>Emprestados</th><th>Disponível</th><th></th></tr></thead>
+    <tbody>${linhas.map(l => `
+      <tr>
+        <td>${esc(l.titulo)}</td>
+        <td>${esc(l.autor || "—")}</td>
+        <td class="num">${esc(l.codigo)}</td>
+        <td class="num">${l.quantidade_total}</td>
+        <td class="num">${l.emprestados}</td>
+        <td>${l.disponivel > 0 ? `<span class="tag ok">${l.disponivel}</span>` : `<span class="tag zero">0</span>`}</td>
+        <td style="white-space:nowrap">
+          <button class="btn ghost sm" data-mais="${l.id}" data-q="${l.quantidade_total}">+1</button>
+          <button class="btn ghost sm" data-menos="${l.id}" data-q="${l.quantidade_total}">−1</button>
+        </td>
+      </tr>`).join("")}</tbody>` : `<tbody><tr><td class="empty">Acervo vazio. Cadastre o primeiro título acima.</td></tr></tbody>`;
+}
+
+$("#btnAddLivro").addEventListener("click", async () => {
+  const titulo = $("#lTitulo").value.trim(), codigo = $("#lCodigo").value.trim();
+  if (!titulo || !codigo) return toast("Título e código são obrigatórios.", true);
+  const { error } = await sb.from("livros").insert({
+    titulo, codigo,
+    autor: $("#lAutor").value.trim() || null,
+    quantidade_total: Math.max(1, Number($("#lQtd").value) || 1)
+  });
+  if (error) return toast(error.message.includes("duplicate") ? "Já existe título com esse código." : error.message, true);
+  $("#lTitulo").value = $("#lAutor").value = $("#lCodigo").value = "";
+  $("#lQtd").value = 1;
+  toast("Título cadastrado.");
+  carregarLivros();
+});
+
+$("#tblLivros").addEventListener("click", async e => {
+  const mais  = e.target.closest("button[data-mais]");
+  const menos = e.target.closest("button[data-menos]");
+  const alvo  = mais || menos; if (!alvo) return;
+  const nova  = Number(alvo.dataset.q) + (mais ? 1 : -1);
+  if (nova < 0) return;
+  const { error } = await sb.from("livros").update({ quantidade_total: nova })
+    .eq("id", mais ? mais.dataset.mais : menos.dataset.menos);
+  if (error) return toast(error.message, true);
+  carregarLivros();
+});
+
+/* ---------------- histórico ---------------- */
+async function carregarHistorico() {
+  const { data, error } = await sb.from("emprestimos_detalhe")
+    .select("*").order("data_emprestimo", { ascending: false }).limit(1000);
+  if (error) { toast(error.message, true); return; }
+  cacheHist = data || [];
+  pintarHist();
+}
+$("#filtroHist").addEventListener("input", pintarHist);
+
+function pintarHist() {
+  const f = $("#filtroHist").value.trim().toLowerCase();
+  const linhas = cacheHist.filter(e => !f ||
+    [e.aluno_nome, e.aluno_matricula, e.livro_titulo, e.livro_codigo]
+      .some(v => String(v || "").toLowerCase().includes(f)));
+  $("#tblHist").innerHTML = linhas.length ? `
+    <thead><tr><th>Aluno</th><th>Livro</th><th>Saída</th><th>Prazo</th><th>Devolução</th><th>Atraso</th><th>Multa</th></tr></thead>
+    <tbody>${linhas.map(e => `
+      <tr>
+        <td>${esc(e.aluno_nome)}<br><small style="color:var(--ink-soft)">${esc(e.aluno_matricula)}</small></td>
+        <td>${esc(e.livro_titulo)}</td>
+        <td class="num">${fmtData(e.data_emprestimo)}</td>
+        <td class="num">${fmtDia(e.data_prevista)}</td>
+        <td class="num">${e.data_devolucao ? fmtData(e.data_devolucao) : "<span class='tag late'>em aberto</span>"}</td>
+        <td class="num">${e.dias_atraso || 0}</td>
+        <td class="num">${Number(e.multa) > 0 ? brl(e.multa) : "—"}</td>
+      </tr>`).join("")}</tbody>` : `<tbody><tr><td class="empty">Nenhum empréstimo registrado ainda.</td></tr></tbody>`;
+}
+
+$("#btnCsvHist").addEventListener("click", () => baixarCSV("historico.csv",
+  cacheHist.map(e => ({
+    aluno: e.aluno_nome, matricula: e.aluno_matricula, livro: e.livro_titulo,
+    codigo: e.livro_codigo, saida: fmtData(e.data_emprestimo),
+    prazo: fmtDia(e.data_prevista), devolucao: e.data_devolucao ? fmtData(e.data_devolucao) : "",
+    dias_atraso: e.dias_atraso, multa: Number(e.multa).toFixed(2)
+  }))));
+
+/* ---------------- ajustes ---------------- */
+async function carregarConfig() {
+  const { data } = await sb.from("config").select("*").maybeSingle();
+  ctx.config = data;
+  if (!data) return;
+  $("#cPrazo").value    = data.prazo_dias;
+  $("#cCarencia").value = data.carencia_dias;
+  $("#cMulta").value    = data.multa_dia;
+  $("#cMultaC").value   = data.multa_dia_contribuinte;
+  $("#cTeto").value     = data.multa_teto ?? "";
+  $("#cBloq").value     = String(data.bloquear_com_atraso);
+}
+
+$("#btnSalvarConfig").addEventListener("click", async () => {
+  const { error } = await sb.from("config").update({
+    prazo_dias: Number($("#cPrazo").value) || 7,
+    carencia_dias: Number($("#cCarencia").value) || 0,
+    multa_dia: Number($("#cMulta").value) || 0,
+    multa_dia_contribuinte: Number($("#cMultaC").value) || 0,
+    multa_teto: $("#cTeto").value === "" ? null : Number($("#cTeto").value),
+    bloquear_com_atraso: $("#cBloq").value === "true",
+    atualizado_em: new Date().toISOString()
+  }).eq("tenant_id", ctx.perfil.tenant_id);
+  if (error) return toast(error.message, true);
+  toast("Regras salvas.");
+  carregarConfig(); carregarAtrasos(); carregarDevolucoes();
+});
+
+$("#btnBackup").addEventListener("click", async () => {
+  const hoje = new Date().toISOString().slice(0, 10);
+  const [a, l, e] = await Promise.all([
+    sb.from("alunos").select("*"),
+    sb.from("livros").select("*"),
+    sb.from("emprestimos_detalhe").select("*")
+  ]);
+  baixarCSV(`backup-alunos-${hoje}.csv`, a.data || []);
+  baixarCSV(`backup-acervo-${hoje}.csv`, l.data || []);
+  baixarCSV(`backup-emprestimos-${hoje}.csv`, e.data || []);
+  toast("Backup baixado. Guarde os três arquivos.");
+});
+
+/* ---------------- start ---------------- */
+iniciar();
+</script>
+</body>
+</html>
