@@ -241,7 +241,7 @@
       <div class="topo">
         <div class="txt">
           <h2>Impressões</h2>
-          <p class="hint">Consulte pela matrícula. Contribuintes ativos têm 100 páginas gratuitas por mês; o excedente custa R$ 0,50 por página.</p>
+          <p class="hint">Consulte pela matrícula. Contribuintes ativos têm 100 páginas gratuitas por mês; o excedente custa R$ 0,50 por página. Se a matrícula não estiver cadastrada, a impressão pode ser registrada como público externo, com cobrança integral de R$ 0,50 por página.</p>
         </div>
       </div>
 
@@ -604,6 +604,7 @@ function limparConsultaImpressao() {
 }
 
 function situacaoImpressao(a) {
+  if (a.externo) return `<span class="tag late">Não cadastrado — cobrança integral</span>`;
   if (!a.ativo) return `<span class="tag zero">Inativo — cobrança integral</span>`;
   if (a.contribuinte) return `<span class="tag ok">Contribuinte</span>`;
   return `<span class="tag late">Não contribuinte</span>`;
@@ -620,14 +621,33 @@ async function buscarAlunoImpressao() {
   btn.disabled = false;
   if (error) return toast(error.message, true);
 
-  const a = Array.isArray(data) ? data[0] : data;
-  if (!a) return toast("Matrícula não encontrada.", true);
+  let a = Array.isArray(data) ? data[0] : data;
+
+  // Se não existir aluno com essa matrícula, permite registrar como público externo.
+  if (!a) {
+    a = {
+      aluno_id: null,
+      nome: "Público externo",
+      matricula: mat,
+      contribuinte: false,
+      ativo: false,
+      paginas_usadas_mes: 0,
+      cota_mensal: 0,
+      cota_restante: 0,
+      valor_pagina: 0.50,
+      externo: true
+    };
+  } else {
+    a.externo = false;
+  }
 
   impAluno = a;
-  $("#impNome").textContent = `${a.nome} · matrícula ${a.matricula}`;
+  $("#impNome").textContent = a.externo
+    ? `Público externo · identificação ${a.matricula}`
+    : `${a.nome} · matrícula ${a.matricula}`;
   $("#impSituacao").innerHTML = situacaoImpressao(a);
-  $("#impUsado").textContent = `${Number(a.paginas_usadas_mes || 0)} página(s)`;
-  $("#impRestante").textContent = (a.contribuinte && a.ativo)
+  $("#impUsado").textContent = a.externo ? "—" : `${Number(a.paginas_usadas_mes || 0)} página(s)`;
+  $("#impRestante").textContent = (a.contribuinte && a.ativo && !a.externo)
     ? `${Number(a.cota_restante || 0)} de ${Number(a.cota_mensal || 100)}`
     : "Sem cota gratuita";
   $("#impAlunoBox").classList.remove("hidden");
@@ -645,7 +665,7 @@ function atualizarPreviewImpressao() {
     return;
   }
 
-  const temBeneficio = Boolean(impAluno.contribuinte && impAluno.ativo);
+  const temBeneficio = Boolean(!impAluno.externo && impAluno.contribuinte && impAluno.ativo);
   const restante = temBeneficio ? Number(impAluno.cota_restante || 0) : 0;
   const cobradas = temBeneficio ? Math.max(0, q - restante) : q;
   const valorPagina = Number(impAluno.valor_pagina || 0.50);
@@ -661,13 +681,13 @@ async function registrarImpressao() {
   const btn = $("#btnRegistrarImp");
   btn.disabled = true;
   const { data, error } = await sb.rpc("registrar_impressao", {
-    p_matricula: impAluno.matricula,
+    p_matricula: $("#impMatricula").value.trim(),
     p_quantidade_paginas: q
   });
   if (error) { btn.disabled = false; return toast(error.message, true); }
 
   const r = Array.isArray(data) ? data[0] : data;
-  const mat = impAluno.matricula;
+  const mat = $("#impMatricula").value.trim();
   toast(Number(r?.valor_cobrado || 0) > 0
     ? `Impressão registrada. Cobrar ${brl(r.valor_cobrado)}.`
     : "Impressão registrada. Sem cobrança.");
@@ -684,7 +704,7 @@ async function carregarImpressoes() {
   const inicio = new Date(ano, mes - 1, 1, 0, 0, 0, 0);
   const fim = new Date(ano, mes, 1, 0, 0, 0, 0);
   const { data, error } = await sb.from("impressoes")
-    .select("id, aluno_id, quantidade_paginas, paginas_cobradas, valor_cobrado, contribuinte_no_momento, aluno_ativo_no_momento, data_impressao, alunos(nome, matricula)")
+    .select("id, aluno_id, matricula_informada, quantidade_paginas, paginas_cobradas, valor_cobrado, contribuinte_no_momento, aluno_ativo_no_momento, data_impressao, alunos(nome, matricula)")
     .gte("data_impressao", inicio.toISOString())
     .lt("data_impressao", fim.toISOString())
     .order("data_impressao", { ascending: false })
@@ -707,13 +727,18 @@ function pintarImpressoes() {
     <thead><tr><th>Aluno</th><th>Situação</th><th>Páginas</th><th>Cobradas</th><th>Valor</th><th>Data</th></tr></thead>
     <tbody>${cacheImpressoes.map(i => {
       const a = i.alunos || {};
-      const sit = !i.aluno_ativo_no_momento
-        ? `<span class="tag zero">Inativo</span>`
-        : i.contribuinte_no_momento
-          ? `<span class="tag ok">Contribuinte</span>`
-          : `<span class="tag late">Não contribuinte</span>`;
+      const externo = !i.aluno_id;
+      const sit = externo
+        ? `<span class="tag late">Público externo</span>`
+        : !i.aluno_ativo_no_momento
+          ? `<span class="tag zero">Inativo</span>`
+          : i.contribuinte_no_momento
+            ? `<span class="tag ok">Contribuinte</span>`
+            : `<span class="tag late">Não contribuinte</span>`;
+      const nomeExibicao = externo ? "Público externo" : (a.nome || "—");
+      const matriculaExibicao = externo ? (i.matricula_informada || "—") : (a.matricula || i.matricula_informada || "—");
       return `<tr>
-        <td>${esc(a.nome || "—")}<br><small style="color:var(--ink-soft)">${esc(a.matricula || "—")}</small></td>
+        <td>${esc(nomeExibicao)}<br><small style="color:var(--ink-soft)">${esc(matriculaExibicao)}</small></td>
         <td>${sit}</td>
         <td class="num">${Number(i.quantidade_paginas || 0)}</td>
         <td class="num">${Number(i.paginas_cobradas || 0)}</td>
@@ -737,8 +762,9 @@ $("#btnRegistrarImp").addEventListener("click", registrarImpressao);
 $("#mesImp").addEventListener("change", carregarImpressoes);
 $("#btnCsvImp").addEventListener("click", () => baixarCSV(`relatorio-impressoes-${$("#mesImp").value || mesAtualInput()}.csv`,
   cacheImpressoes.map(i => ({
-    aluno: i.alunos?.nome || "", matricula: i.alunos?.matricula || "",
-    contribuinte: i.contribuinte_no_momento && i.aluno_ativo_no_momento ? "sim" : "nao",
+    aluno: i.aluno_id ? (i.alunos?.nome || "") : "Público externo",
+    matricula: i.aluno_id ? (i.alunos?.matricula || i.matricula_informada || "") : (i.matricula_informada || ""),
+    contribuinte: i.aluno_id && i.contribuinte_no_momento && i.aluno_ativo_no_momento ? "sim" : "nao",
     paginas: i.quantidade_paginas, paginas_cobradas: i.paginas_cobradas,
     valor: Number(i.valor_cobrado || 0).toFixed(2), data: fmtData(i.data_impressao)
   }))));
