@@ -205,6 +205,7 @@
     </div>
     <nav>
       <button data-view="devolucao" aria-current="true"><span class="ic">▤</span>Empréstimos<span class="badge hidden" id="bgDev"></span></button>
+      <button data-view="impressoes" aria-current="false"><span class="ic">▧</span>Impressões</button>
       <button data-view="atrasos"   aria-current="false"><span class="ic">！</span>Atrasos<span class="badge hidden" id="bgAtr"></span></button>
       <button data-view="alunos"    aria-current="false"><span class="ic">☺</span>Alunos</button>
       <button data-view="livros"    aria-current="false"><span class="ic">▥</span>Acervo</button>
@@ -233,6 +234,70 @@
         <input type="search" id="filtroDev" class="barra" placeholder="Filtrar por aluno, matrícula, título ou código" />
       </div>
       <div class="tbl-wrap"><table id="tblDev"></table></div>
+    </section>
+
+    <!-- ---------- IMPRESSÕES ---------- -->
+    <section class="view" id="view-impressoes">
+      <div class="topo">
+        <div class="txt">
+          <h2>Impressões</h2>
+          <p class="hint">Consulte pela matrícula. Contribuintes ativos têm 100 páginas gratuitas por mês; o excedente custa R$ 0,50 por página.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Registrar impressão</h3>
+        <div class="row">
+          <div class="field" style="max-width:220px">
+            <label for="impMatricula">Matrícula</label>
+            <input id="impMatricula" autocomplete="off" placeholder="Digite e pressione Enter" />
+          </div>
+          <button class="btn" id="btnBuscarImp">Consultar</button>
+        </div>
+
+        <div id="impAlunoBox" class="resumo hidden" style="margin-top:16px">
+          <div class="linha"><span>Aluno</span><strong id="impNome">—</strong></div>
+          <div class="linha"><span>Situação</span><strong id="impSituacao">—</strong></div>
+          <div class="linha"><span>Usado neste mês</span><strong id="impUsado">—</strong></div>
+          <div class="linha"><span>Cota restante</span><strong id="impRestante">—</strong></div>
+        </div>
+
+        <div id="impLancamento" class="hidden" style="margin-top:16px">
+          <div class="row">
+            <div class="field" style="max-width:220px">
+              <label for="impQtd">Páginas desta impressão</label>
+              <input id="impQtd" type="number" min="1" step="1" placeholder="Ex.: 20" />
+            </div>
+            <div class="resumo" style="flex:1;min-width:260px;padding:8px 14px">
+              <div class="linha"><span>Páginas cobradas</span><strong id="impPrevCobradas">0</strong></div>
+              <div class="linha"><span>Valor a pagar</span><strong id="impPrevValor">R$ 0,00</strong></div>
+            </div>
+            <button class="btn" id="btnRegistrarImp" disabled>Registrar impressão</button>
+          </div>
+          <p class="nota">A data e a hora são registradas automaticamente ao confirmar.</p>
+        </div>
+      </div>
+
+      <div class="topo" style="margin-top:26px">
+        <div class="txt">
+          <h2>Relatório mensal</h2>
+          <p class="hint">O histórico fica salvo. A cota reinicia automaticamente no início de cada mês.</p>
+        </div>
+        <div class="field" style="margin:0;max-width:180px">
+          <label for="mesImp">Mês</label>
+          <input id="mesImp" type="month" />
+        </div>
+        <button class="btn ghost sm" id="btnCsvImp">Baixar relatório CSV</button>
+      </div>
+
+      <div class="card" style="padding:12px 16px">
+        <div class="resumo" id="resumoImpMes">
+          <div class="linha"><span>Total de páginas</span><strong id="impTotalPaginas">0</strong></div>
+          <div class="linha"><span>Páginas cobradas</span><strong id="impTotalCobradas">0</strong></div>
+          <div class="linha"><span>Total arrecadado</span><strong id="impTotalValor">R$ 0,00</strong></div>
+        </div>
+      </div>
+      <div class="tbl-wrap"><table id="tblImpressoes"></table></div>
     </section>
 
     <!-- ---------- ATRASOS ---------- -->
@@ -430,7 +495,8 @@ const $$ = (s) => Array.from(document.querySelectorAll(s));
 
 let ctx = { perfil: null, config: null };
 let alunoSel = null, livroSel = null;
-let cacheDev = [], cacheAtrasos = [], cacheAlunos = [], cacheLivros = [], cacheHist = [];
+let cacheDev = [], cacheAtrasos = [], cacheAlunos = [], cacheLivros = [], cacheHist = [], cacheImpressoes = [];
+let impAluno = null;
 
 /* ---------------- utilidades ---------------- */
 let toastTimer;
@@ -499,7 +565,7 @@ async function iniciar() {
   $("#app").classList.remove("hidden");
 
   await carregarConfig();
-  await Promise.all([carregarDevolucoes(), carregarAtrasos(), carregarAlunos(), carregarLivros()]);
+  await Promise.all([carregarDevolucoes(), carregarAtrasos(), carregarAlunos(), carregarLivros(), carregarImpressoes()]);
 }
 
 /* ---------------- navegação ---------------- */
@@ -509,7 +575,7 @@ $$("aside#side nav button").forEach(b => b.addEventListener("click", () => {
   $$("section.view").forEach(s => s.classList.remove("active"));
   $("#view-" + b.dataset.view).classList.add("active");
   window.scrollTo(0, 0);
-  ({ devolucao: carregarDevolucoes, atrasos: carregarAtrasos, alunos: carregarAlunos,
+  ({ devolucao: carregarDevolucoes, impressoes: carregarImpressoes, atrasos: carregarAtrasos, alunos: carregarAlunos,
      livros: carregarLivros, historico: carregarHistorico })[b.dataset.view]?.();
 }));
 
@@ -518,6 +584,164 @@ function atualizarBadges() {
   d.textContent = cacheDev.length;     d.classList.toggle("hidden", cacheDev.length === 0);
   a.textContent = cacheAtrasos.length; a.classList.toggle("hidden", cacheAtrasos.length === 0);
 }
+
+/* =====================================================================
+   IMPRESSÕES
+   ===================================================================== */
+function mesAtualInput() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function limparConsultaImpressao() {
+  impAluno = null;
+  $("#impAlunoBox").classList.add("hidden");
+  $("#impLancamento").classList.add("hidden");
+  $("#impQtd").value = "";
+  $("#btnRegistrarImp").disabled = true;
+  $("#impPrevCobradas").textContent = "0";
+  $("#impPrevValor").textContent = brl(0);
+}
+
+function situacaoImpressao(a) {
+  if (!a.ativo) return `<span class="tag zero">Inativo — cobrança integral</span>`;
+  if (a.contribuinte) return `<span class="tag ok">Contribuinte</span>`;
+  return `<span class="tag late">Não contribuinte</span>`;
+}
+
+async function buscarAlunoImpressao() {
+  const mat = $("#impMatricula").value.trim();
+  limparConsultaImpressao();
+  if (!mat) return toast("Digite a matrícula.", true);
+
+  const btn = $("#btnBuscarImp");
+  btn.disabled = true;
+  const { data, error } = await sb.rpc("consultar_impressao", { p_matricula: mat });
+  btn.disabled = false;
+  if (error) return toast(error.message, true);
+
+  const a = Array.isArray(data) ? data[0] : data;
+  if (!a) return toast("Matrícula não encontrada.", true);
+
+  impAluno = a;
+  $("#impNome").textContent = `${a.nome} · matrícula ${a.matricula}`;
+  $("#impSituacao").innerHTML = situacaoImpressao(a);
+  $("#impUsado").textContent = `${Number(a.paginas_usadas_mes || 0)} página(s)`;
+  $("#impRestante").textContent = (a.contribuinte && a.ativo)
+    ? `${Number(a.cota_restante || 0)} de ${Number(a.cota_mensal || 100)}`
+    : "Sem cota gratuita";
+  $("#impAlunoBox").classList.remove("hidden");
+  $("#impLancamento").classList.remove("hidden");
+  atualizarPreviewImpressao();
+  $("#impQtd").focus();
+}
+
+function atualizarPreviewImpressao() {
+  const q = Math.max(0, Math.floor(Number($("#impQtd").value) || 0));
+  $("#btnRegistrarImp").disabled = !(impAluno && q > 0);
+  if (!impAluno || q <= 0) {
+    $("#impPrevCobradas").textContent = "0";
+    $("#impPrevValor").textContent = brl(0);
+    return;
+  }
+
+  const temBeneficio = Boolean(impAluno.contribuinte && impAluno.ativo);
+  const restante = temBeneficio ? Number(impAluno.cota_restante || 0) : 0;
+  const cobradas = temBeneficio ? Math.max(0, q - restante) : q;
+  const valorPagina = Number(impAluno.valor_pagina || 0.50);
+  $("#impPrevCobradas").textContent = String(cobradas);
+  $("#impPrevValor").textContent = brl(cobradas * valorPagina);
+}
+
+async function registrarImpressao() {
+  if (!impAluno) return toast("Consulte uma matrícula primeiro.", true);
+  const q = Math.floor(Number($("#impQtd").value) || 0);
+  if (q < 1) return toast("Informe uma quantidade válida de páginas.", true);
+
+  const btn = $("#btnRegistrarImp");
+  btn.disabled = true;
+  const { data, error } = await sb.rpc("registrar_impressao", {
+    p_matricula: impAluno.matricula,
+    p_quantidade_paginas: q
+  });
+  if (error) { btn.disabled = false; return toast(error.message, true); }
+
+  const r = Array.isArray(data) ? data[0] : data;
+  const mat = impAluno.matricula;
+  toast(Number(r?.valor_cobrado || 0) > 0
+    ? `Impressão registrada. Cobrar ${brl(r.valor_cobrado)}.`
+    : "Impressão registrada. Sem cobrança.");
+  $("#impQtd").value = "";
+  $("#impMatricula").value = mat;
+  await Promise.all([buscarAlunoImpressao(), carregarImpressoes()]);
+}
+
+async function carregarImpressoes() {
+  if (!$("#mesImp").value) $("#mesImp").value = mesAtualInput();
+  const [ano, mes] = $("#mesImp").value.split("-").map(Number);
+  if (!ano || !mes) return;
+
+  const inicio = new Date(ano, mes - 1, 1, 0, 0, 0, 0);
+  const fim = new Date(ano, mes, 1, 0, 0, 0, 0);
+  const { data, error } = await sb.from("impressoes")
+    .select("id, aluno_id, quantidade_paginas, paginas_cobradas, valor_cobrado, contribuinte_no_momento, aluno_ativo_no_momento, data_impressao, alunos(nome, matricula)")
+    .gte("data_impressao", inicio.toISOString())
+    .lt("data_impressao", fim.toISOString())
+    .order("data_impressao", { ascending: false })
+    .limit(2000);
+  if (error) return toast(error.message, true);
+
+  cacheImpressoes = data || [];
+  pintarImpressoes();
+}
+
+function pintarImpressoes() {
+  const totalPaginas = cacheImpressoes.reduce((s, x) => s + Number(x.quantidade_paginas || 0), 0);
+  const totalCobradas = cacheImpressoes.reduce((s, x) => s + Number(x.paginas_cobradas || 0), 0);
+  const totalValor = cacheImpressoes.reduce((s, x) => s + Number(x.valor_cobrado || 0), 0);
+  $("#impTotalPaginas").textContent = totalPaginas;
+  $("#impTotalCobradas").textContent = totalCobradas;
+  $("#impTotalValor").textContent = brl(totalValor);
+
+  $("#tblImpressoes").innerHTML = cacheImpressoes.length ? `
+    <thead><tr><th>Aluno</th><th>Situação</th><th>Páginas</th><th>Cobradas</th><th>Valor</th><th>Data</th></tr></thead>
+    <tbody>${cacheImpressoes.map(i => {
+      const a = i.alunos || {};
+      const sit = !i.aluno_ativo_no_momento
+        ? `<span class="tag zero">Inativo</span>`
+        : i.contribuinte_no_momento
+          ? `<span class="tag ok">Contribuinte</span>`
+          : `<span class="tag late">Não contribuinte</span>`;
+      return `<tr>
+        <td>${esc(a.nome || "—")}<br><small style="color:var(--ink-soft)">${esc(a.matricula || "—")}</small></td>
+        <td>${sit}</td>
+        <td class="num">${Number(i.quantidade_paginas || 0)}</td>
+        <td class="num">${Number(i.paginas_cobradas || 0)}</td>
+        <td class="num">${Number(i.valor_cobrado || 0) > 0 ? brl(i.valor_cobrado) : "—"}</td>
+        <td class="num">${fmtData(i.data_impressao)}</td>
+      </tr>`;
+    }).join("")}</tbody>`
+    : `<tbody><tr><td class="empty">Nenhuma impressão registrada neste mês.</td></tr></tbody>`;
+}
+
+$("#btnBuscarImp").addEventListener("click", buscarAlunoImpressao);
+$("#impMatricula").addEventListener("keydown", e => {
+  if (e.key === "Enter") { e.preventDefault(); buscarAlunoImpressao(); }
+});
+$("#impMatricula").addEventListener("input", limparConsultaImpressao);
+$("#impQtd").addEventListener("input", atualizarPreviewImpressao);
+$("#impQtd").addEventListener("keydown", e => {
+  if (e.key === "Enter") { e.preventDefault(); registrarImpressao(); }
+});
+$("#btnRegistrarImp").addEventListener("click", registrarImpressao);
+$("#mesImp").addEventListener("change", carregarImpressoes);
+$("#btnCsvImp").addEventListener("click", () => baixarCSV(`relatorio-impressoes-${$("#mesImp").value || mesAtualInput()}.csv`,
+  cacheImpressoes.map(i => ({
+    aluno: i.alunos?.nome || "", matricula: i.alunos?.matricula || "",
+    contribuinte: i.contribuinte_no_momento && i.aluno_ativo_no_momento ? "sim" : "nao",
+    paginas: i.quantidade_paginas, paginas_cobradas: i.paginas_cobradas,
+    valor: Number(i.valor_cobrado || 0).toFixed(2), data: fmtData(i.data_impressao)
+  }))));
 
 /* =====================================================================
    MODAL
@@ -1047,4 +1271,3 @@ iniciar();
 </script>
 </body>
 </html>
-
